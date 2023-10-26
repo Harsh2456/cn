@@ -1,0 +1,35 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <netdb.h>
+#include <arpa/inet.h>
+
+int main() {
+    char input[256];
+    std::cout << "Enter an IP address or a URL: ";
+    std::cin.getline(input, sizeof(input));
+
+    struct hostent *hostInfo;
+    struct in_addr ipv4;
+
+    // Try to resolve as an IP address
+    if (inet_pton(AF_INET, input, &ipv4) == 1) {
+        hostInfo = gethostbyaddr(&ipv4, sizeof(struct in_addr), AF_INET);
+        if (hostInfo != nullptr) {
+            std::cout << "IP Address: " << input << " corresponds to the URL: " << hostInfo->h_name << std::endl;
+        } else {
+            std::cout << "Unable to resolve the IP address." << std::endl;
+        }
+    }
+    // Try to resolve as a URL
+    else {
+        hostInfo = gethostbyname(input);
+        if (hostInfo != nullptr) {
+            std::cout << "URL: " << input << " corresponds to the IP Address: " << inet_ntoa(*(struct in_addr*)hostInfo->h_addr) << std::endl;
+        } else {
+            std::cout << "Unable to resolve the URL." << std::endl;
+        }
+    }
+
+    return 0;
+}
