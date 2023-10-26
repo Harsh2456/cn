@@ -1,0 +1,50 @@
+#include <iostream>
+#include <vector>
+#include <sstream>
+#include <bitset>
+
+// Function to split a string by a delimiter and return a vector of integers
+std::vector<int> splitString(const std::string& s, char delimiter) {
+    std::vector<int> parts;
+    std::istringstream ss(s);
+    std::string part;
+    while (std::getline(ss, part, delimiter)) {
+        parts.push_back(std::stoi(part));
+    }
+    return parts;
+}
+
+int main() {
+    std::string ipAddress, subnetMask;
+
+    std::cout << "Enter IP Address (e.g., 192.168.1.1): ";
+    std::cin >> ipAddress;
+
+    std::cout << "Enter Subnet Mask (e.g., 255.255.255.0): ";
+    std::cin >> subnetMask;
+
+    std::vector<int> ipParts = splitString(ipAddress, '.');
+    std::vector<int> maskParts = splitString(subnetMask, '.');
+
+    if (ipParts.size() != 4 || maskParts.size() != 4) {
+        std::cout << "Invalid IP address or subnet mask format." << std::endl;
+        return 1;
+    }
+
+    std::vector<int> networkAddress(4);
+    for (int i = 0; i < 4; i++) {
+        networkAddress[i] = ipParts[i] & maskParts[i];
+    }
+
+    std::vector<int> broadcastAddress(4);
+    for (int i = 0; i < 4; i++) {
+        broadcastAddress[i] = ipParts[i] | (~maskParts[i] & 0xFF);
+    }
+
+    std::cout << "IP Address: " << ipAddress << "\n";
+    std::cout << "Subnet Mask: " << subnetMask << "\n";
+    std::cout << "Network Address: " << networkAddress[0] << "." << networkAddress[1] << "." << networkAddress[2] << "." << networkAddress[3] << "\n";
+    std::cout << "Broadcast Address: " << broadcastAddress[0] << "." << broadcastAddress[1] << "." << broadcastAddress[2] << "." << broadcastAddress[3] << "\n";
+
+    return 0;
+}
