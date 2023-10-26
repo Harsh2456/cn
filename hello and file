@@ -1,0 +1,126 @@
+// Server.cpp (Run this on one machine)
+#include <iostream>
+#include <cstring>
+#include <fstream>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+
+const int PORT = 12345;
+const int BUFFER_SIZE = 1024;
+
+int main() {
+    int serverSocket, clientSocket;
+    struct sockaddr_in serverAddr, clientAddr;
+
+    // Create a socket
+    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (serverSocket < 0) {
+        perror("Error in socket");
+        return 1;
+    }
+
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(PORT);
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+
+    // Bind the socket
+    if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
+        perror("Error in bind");
+        return 1;
+    }
+
+    // Listen for incoming connections
+    listen(serverSocket, 5);
+    socklen_t addr_size = sizeof(clientAddr);
+    clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &addr_size);
+
+    char buffer[BUFFER_SIZE];
+    memset(buffer, 0, sizeof(buffer));
+
+    // Receive and display a "Hello" message from the client
+    recv(clientSocket, buffer, sizeof(buffer), 0);
+    std::cout << "Received from client: " << buffer << std::endl;
+
+    // File transfer
+    std::ifstream file("file.txt", std::ios::binary);
+    if (!file) {
+        perror("Error opening file");
+        close(clientSocket);
+        close(serverSocket);
+        return 1;
+    }
+
+    while (file) {
+        file.read(buffer, sizeof(buffer));
+        send(clientSocket, buffer, sizeof(buffer), 0);
+        memset(buffer, 0, sizeof(buffer));
+    }
+
+    std::cout << "File transfer completed." << std::endl;
+
+    close(clientSocket);
+    close(serverSocket);
+
+    return 0;
+}
+
+//
+// Client.cpp (Run this on another machine)
+#include <iostream>
+#include <cstring>
+#include <fstream>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+
+const char* SERVER_IP = "127.0.0.1";  // Change this to the IP of the server
+const int PORT = 12345;
+const int BUFFER_SIZE = 1024;
+
+int main() {
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+
+    // Create a socket
+    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (clientSocket < 0) {
+        perror("Error in socket");
+        return 1;
+    }
+
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(PORT);
+    serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
+
+    // Connect to the server
+    if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
+        perror("Error in connect");
+        return 1;
+    }
+
+    // Send a "Hello" message to the server
+    const char* helloMsg = "Hello from client";
+    send(clientSocket, helloMsg, strlen(helloMsg), 0);
+
+    char buffer[BUFFER_SIZE];
+    memset(buffer, 0, sizeof(buffer));
+
+    // Receive and save the file from the server
+    std::ofstream file("received_file.txt", std::ios::binary);
+    while (true) {
+        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+        if (bytesReceived <= 0) {
+            break;
+        }
+        file.write(buffer, bytesReceived);
+        memset(buffer, 0, sizeof(buffer));
+    }
+
+    std::cout << "File received and saved as 'received_file.txt'." << std::endl;
+
+    close(clientSocket);
+
+    return 0;
+}
+
