@@ -1,0 +1,82 @@
+Certainly, you can configure a network with three routers using the RIP (Routing Information Protocol) routing protocol in Cisco Packet Tracer. Here's a step-by-step guide for setting up a basic RIP network:
+
+Step 1: Open Packet Tracer and Create the Network Topology
+
+Open Cisco Packet Tracer.
+Create a new network topology by dragging and dropping routers from the "Network Devices" panel to the workspace.
+Step 2: Connect the Routers
+
+Connect the routers using Ethernet connections. Click on a router's FastEthernet or GigabitEthernet interface and connect it to the corresponding interface of another router.
+Step 3: Configure the Routers
+
+Now, configure the routers with IP addresses and enable RIP.
+
+Router 1 Configuration:
+
+Right-click on Router 1 and select "CLI" to open the command line interface.
+Enter the following commands:
+plaintext
+Copy code
+Router> enable
+Router# configure terminal
+Router(config)# hostname R1
+R1(config)# interface GigabitEthernet0/0
+R1(config-if)# ip address 192.168.1.1 255.255.255.0
+R1(config-if)# no shutdown
+R1(config-if)# exit
+R1(config)# router rip
+R1(config-router)# version 2
+R1(config-router)# network 192.168.1.0
+R1(config-router)# network 192.168.2.0
+R1(config-router)# end
+Router 2 Configuration:
+
+Right-click on Router 2 and select "CLI" to open the command line interface.
+Enter the following commands:
+plaintext
+Copy code
+Router> enable
+Router# configure terminal
+Router(config)# hostname R2
+R2(config)# interface GigabitEthernet0/0
+R2(config-if)# ip address 192.168.2.1 255.255.255.0
+R2(config-if)# no shutdown
+R2(config-if)# exit
+R2(config)# router rip
+R2(config-router)# version 2
+R2(config-router)# network 192.168.2.0
+R2(config-router)# network 192.168.3.0
+R2(config-router)# end
+Router 3 Configuration:
+
+Right-click on Router 3 and select "CLI" to open the command line interface.
+Enter the following commands:
+plaintext
+Copy code
+Router> enable
+Router# configure terminal
+Router(config)# hostname R3
+R3(config)# interface GigabitEthernet0/0
+R3(config-if)# ip address 192.168.3.1 255.255.255.0
+R3(config-if)# no shutdown
+R3(config-if)# exit
+R3(config)# router rip
+R3(config-router)# version 2
+R3(config-router)# network 192.168.3.0
+R3(config-router)# end
+Step 4: Verify RIP Configuration
+
+To verify the RIP configuration, you can use the following command on each router's CLI:
+plaintext
+Copy code
+show ip route
+You should see RIP routes in the routing table indicating that routers are aware of each other's networks.
+Step 5: Test Connectivity
+
+You can test connectivity by sending ICMP (ping) packets from one router to another using their configured IP addresses.
+
+That's it! You've configured a basic network with three routers using the RIP routing protocol in Cisco Packet Tracer. You can expand and customize this network as needed for your specific scenario.
+
+
+
+
